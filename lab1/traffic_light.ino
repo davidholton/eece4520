@@ -6,7 +6,7 @@ const unsigned RED_LED = 0;
 const unsigned YELLOW_LED = 1;
 const unsigned GREEN_LED = 2;
 const unsigned BUZZER_PIN = 3;
-const unsigned BUTTON_PIN = 4 ;  
+const unsigned BUTTON_PIN = 4;  
 
 // sets the led to be the only on led
 void display_light(const unsigned led) {
