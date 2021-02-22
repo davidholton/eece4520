@@ -1,12 +1,12 @@
 enum State {PAUSED, RED, YELLOW, GREEN};
 State current_state = PAUSED;
 
-// TODO: update pins to the corresponding physical pins
-const unsigned RED_LED = 0;
-const unsigned YELLOW_LED = 1;
-const unsigned GREEN_LED = 2;
-const unsigned BUZZER_PIN = 3;
-const unsigned BUTTON_PIN = 4;  
+// corresponding physical pins
+const unsigned RED_LED = 7;
+const unsigned YELLOW_LED = 5;
+const unsigned GREEN_LED = 3;
+const unsigned BUZZER_PIN = 9;
+const unsigned BUTTON_PIN = A4;
 
 // sets the led to be the only on led
 void display_light(const unsigned led) {
@@ -24,7 +24,7 @@ void setup() {
     pinMode(YELLOW_LED, OUTPUT);
     pinMode(GREEN_LED, OUTPUT);
     pinMode(BUZZER_PIN, OUTPUT);
-    pinMode(BUTTON_PIN, OUTPUT);
+    pinMode(BUTTON_PIN, INPUT);
 }
 
 void loop() {
@@ -39,9 +39,9 @@ void loop() {
             }
             
             digitalWrite(RED_LED, HIGH);
-            delay(500);
+            delay(50);
             digitalWrite(RED_LED, LOW);
-            delay(500);
+            delay(50);
             
             current_state = PAUSED;            
             break;
