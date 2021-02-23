@@ -54,7 +54,7 @@ void loop() {
             delay(3000);
             digitalWrite(BUZZER_PIN, LOW);
             
-            current_state = YELLOW;
+            current_state = GREEN;
             break;
         case YELLOW:
             // Entering YELLOW state
@@ -64,7 +64,7 @@ void loop() {
             delay(3000);
             digitalWrite(BUZZER_PIN, LOW);
             
-            current_state = GREEN;
+            current_state = RED;
             break;
         case GREEN:
             // Entering GREEN state
@@ -75,7 +75,7 @@ void loop() {
             delay(3000);
             digitalWrite(BUZZER_PIN, LOW);
             
-            current_state = RED;
+            current_state = YELLOW;
             break;
     }
 
