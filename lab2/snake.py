@@ -8,14 +8,14 @@
 import turtle
 import time
 import random
-# TODO uncomment the following line to use pyserial package
-#import serial
+import serial
+import math
 
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-#serialDevFile = '/dev/cu.usbmodem14201'
-#ser=serial.Serial(serialDevFile, 9600, timeout=0)
+#serialDevFile = '/dev/cu.usbmodem14201' # RICHARD
+ser=serial.Serial(serialDevFile, 9600, timeout=0)
 
 delay = 0.1
 
@@ -94,6 +94,26 @@ def move():
         x = head.xcor()
         head.setx(x + 20)
 
+
+def magnitude(vec):
+    return math.sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]))
+
+
+def normalize(vec):
+    mag = magnitude(vec)
+    return (vec[0] / mag, vec[1] / mag)
+
+
+def vector_to_direction(vec):
+    if abs(vec[1]) > abs(vec[0]):
+        if vec[1] > 0:
+            return "up"
+        return "down"
+    if vec[0] > 0:
+        return "right"
+    return "left"
+
+
 # Keyboard bindings
 wn.listen()
 wn.onkey(go_up, "w")
@@ -115,6 +135,19 @@ while True:
     #     head.direction = "down"
     # elif ......
     #
+
+    # Read a line of input from Arduino
+    # Format: "x y" where x and y are integer strings seperated by a space
+    serial_input = ser.readline()
+
+    # Convert the string into a list of integers representing x and y
+    vec = [int(n) for n in serial_input.split(" ")]
+
+    # Normalize the vector
+    normal = normalize(vec)
+
+    # Convert the normalized input vector to a direction
+    head.direction = vector_to_direction(normal)
 
     # Check for a collision with the border
     if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
@@ -146,6 +179,7 @@ while True:
         # you need to send a flag to Arduino indicating an apple is eaten
         # so that the Arduino will beep the buzzer
         # Hint: refer to the example at Serial-RW/pyserial-test.py
+        ser.write(1)
 
         # Move the food to a random spot
         x = random.randint(-290, 290)
