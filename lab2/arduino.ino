@@ -48,10 +48,8 @@ void loop() {
     }
   }
 
-  // x_dir = map(analogRead(JOY_X), 0, 1023, -512, 512);
-  // y_dir = map(analogRead(JOY_Y), 0, 1023, -512, 512);
-  x_dir = analogRead(JOY_X);
-  y_dir = analogRead(JOY_Y);
+  x_dir = map(analogRead(JOY_X), 0, 1023, -512, 512);
+  y_dir = map(analogRead(JOY_Y), 0, 1023, -512, 512);
 
   Serial.print(x_dir);
   Serial.print(" ");
