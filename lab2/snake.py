@@ -14,8 +14,8 @@ import math
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-#serialDevFile = '/dev/cu.usbmodem14201' # RICHARD
-ser=serial.Serial(serialDevFile, 9600, timeout=0)
+serialDevFile = "COM3"
+ser = serial.Serial(serialDevFile, 9600, timeout=5)
 
 delay = 0.1
 
@@ -29,7 +29,7 @@ wn = turtle.Screen()
 wn.title("Snake Game by @TokyoEdTech (mod by YL)")
 wn.bgcolor("green")
 wn.setup(width=600, height=600)
-wn.tracer(0) # Turns off the screen updates
+wn.tracer(0)    # Turns off the screen updates
 
 # Snake head
 head = turtle.Turtle()
@@ -37,7 +37,7 @@ head.speed(0)
 head.shape("square")
 head.color("black")
 head.penup()
-head.goto(0,0)
+head.goto(0, 0)
 head.direction = "stop"
 
 # Snake food
@@ -46,7 +46,7 @@ food.speed(0)
 food.shape("circle")
 food.color("red")
 food.penup()
-food.goto(0,100)
+food.goto(0, 100)
 
 segments = []
 
@@ -58,24 +58,30 @@ pen.color("white")
 pen.penup()
 pen.hideturtle()
 pen.goto(0, 260)
-pen.write("Score: 0  High Score: 0  P/A: 10", align="center", font=("Courier", 24, "normal"))
+pen.write("Score: 0  High Score: 0  P/A: 10", align="center",
+          font=("Courier", 24, "normal"))
+
 
 # Functions
 def go_up():
     if head.direction != "down":
         head.direction = "up"
 
+
 def go_down():
     if head.direction != "up":
         head.direction = "down"
+
 
 def go_left():
     if head.direction != "right":
         head.direction = "left"
 
+
 def go_right():
     if head.direction != "left":
         head.direction = "right"
+
 
 def move():
     if head.direction == "up":
@@ -101,17 +107,21 @@ def magnitude(vec):
 
 def normalize(vec):
     mag = magnitude(vec)
+    if mag < 100:
+        return (0, 0)
     return (vec[0] / mag, vec[1] / mag)
 
 
-def vector_to_direction(vec):
+def move_to_vector(vec):
+    if vec[0] == 0 and vec[1] == 0:
+        return
     if abs(vec[1]) > abs(vec[0]):
         if vec[1] > 0:
-            return "up"
-        return "down"
+            return go_down()
+        return go_up()
     if vec[0] > 0:
-        return "right"
-    return "left"
+        return go_right()
+    return go_left()
 
 
 # Keyboard bindings
@@ -128,37 +138,36 @@ while True:
     # TODO: notes by Prof. Luo
     # you need to add your code to read control information from serial port
     # then use that information to set head.direction
-    # For example, 
+    # For example,
     # if control_information == 'w':
     #     head.direction = "up"
     # elif control_information == 's':
     #     head.direction = "down"
     # elif ......
-    #
-
-    # Read a line of input from Arduino
-    # Format: "x y" where x and y are integer strings seperated by a space
     serial_input = ser.readline()
+    input_string = serial_input.decode("ascii").strip()
 
-    # Convert the string into a list of integers representing x and y
-    vec = [int(n) for n in serial_input.split(" ")]
+    if len(input_string) != 0:
+        print(input_string)
 
-    # Normalize the vector
-    normal = normalize(vec)
+        (x_pos, y_pos) = input_string.split(" ")
+        vec = [int(x_pos), int(y_pos)]
 
-    # Convert the normalized input vector to a direction
-    head.direction = vector_to_direction(normal)
+        print(vec)
+        normal = normalize(vec)
+        move_to_vector(normal)
 
     # Check for a collision with the border
-    if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
+    if head.xcor() > 290 or head.xcor() < -290 \
+       or head.ycor() > 290 or head.ycor() < -290:
         time.sleep(1)
-        head.goto(0,0)
+        head.goto(0, 0)
         head.direction = "stop"
 
         # Hide the segments
         for segment in segments:
             segment.goto(1000, 1000)
-        
+
         # Clear the segments list
         segments.clear()
 
@@ -169,8 +178,9 @@ while True:
         delay = 0.1
 
         pen.clear()
-        pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal")) 
-
+        pen.write("Score: {}  High Score: {}  P/A: {}".format(score,
+                  high_score, ppa), align="center",
+                  font=("Courier", 24, "normal"))
 
     # Check for a collision with the food
     if head.distance(food) < 20:
@@ -179,12 +189,12 @@ while True:
         # you need to send a flag to Arduino indicating an apple is eaten
         # so that the Arduino will beep the buzzer
         # Hint: refer to the example at Serial-RW/pyserial-test.py
-        ser.write(1)
+        ser.write(b"e")
 
         # Move the food to a random spot
         x = random.randint(-290, 290)
         y = random.randint(-290, 290)
-        food.goto(x,y)
+        food.goto(x, y)
 
         # Add a segment
         new_segment = turtle.Turtle()
@@ -202,9 +212,11 @@ while True:
 
         if score > high_score:
             high_score = score
-        
+
         pen.clear()
-        pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal")) 
+        pen.write("Score: {}  High Score: {}  P/A: {}".format(score,
+                  high_score, ppa), align="center",
+                  font=("Courier", 24, "normal"))
 
     # Move the end segments first in reverse order
     for index in range(len(segments)-1, 0, -1):
@@ -216,21 +228,21 @@ while True:
     if len(segments) > 0:
         x = head.xcor()
         y = head.ycor()
-        segments[0].goto(x,y)
+        segments[0].goto(x, y)
 
-    move()    
+    move()
 
     # Check for head collision with the body segments
     for segment in segments:
         if segment.distance(head) < 20:
             time.sleep(1)
-            head.goto(0,0)
+            head.goto(0, 0)
             head.direction = "stop"
-        
+
             # Hide the segments
             for segment in segments:
                 segment.goto(1000, 1000)
-        
+
             # Clear the segments list
             segments.clear()
 
@@ -239,10 +251,12 @@ while True:
 
             # Reset the delay
             delay = 0.1
-        
+
             # Update the score display
             pen.clear()
-            pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal")) 
+            pen.write("Score: {}  High Score: {}  P/A: {}".format(score,
+                      high_score, ppa), align="center",
+                      font=("Courier", 24, "normal"))
 
     time.sleep(delay)
 
