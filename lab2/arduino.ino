@@ -37,12 +37,12 @@ void loop() {
     unsigned long dt = current_time - previous_time;
 
     // If timer is active decrement by the delta time
-    if (buzzer_time > 0) {
-        buzzer_time -= dt;
+    if (buzzer_timer > 0) {
+        buzzer_timer -= dt;
     }
 
     // If the timer is finished turn off the buzzer
-    if (buzzer_time <= 0) {
+    if (buzzer_timer <= 0) {
         digitalWrite(BUZZER_PIN, LOW);
     }
 
@@ -64,7 +64,7 @@ void loop() {
 
         // 'e' means we ate an apple. Turn on buzzer
         if (byte == 'e') {
-            buzzer_time = BUZZ_TIME;
+            buzzer_timer = BUZZ_TIME;
             digitalWrite(BUZZER_PIN, HIGH);
         }
     }
