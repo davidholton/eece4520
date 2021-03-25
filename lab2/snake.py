@@ -107,7 +107,7 @@ def magnitude(vec):
 
 def normalize(vec):
     mag = magnitude(vec)
-    if mag < 100:
+    if mag < 120:
         return (0, 0)
     return (vec[0] / mag, vec[1] / mag)
 
