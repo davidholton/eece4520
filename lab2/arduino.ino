@@ -1,5 +1,8 @@
 #include <Wire.h>
 
+// Use the gyroscope controls when set to 1
+#define USE_GYRO    0
+
 const unsigned JOY_X = A0; // analog
 const unsigned JOY_Y = A1; // analog
 
@@ -46,6 +49,7 @@ void loop() {
         digitalWrite(BUZZER_PIN, LOW);
     }
 
+    // Set the output values to the Joystick readings
     int x_pos = map(analogRead(JOY_X), 0, 1023, -512, 512);
     int y_pos = map(analogRead(JOY_Y), 0, 1023, -512, 512);
 
@@ -69,9 +73,11 @@ void loop() {
         }
     }
 
-    // Use Gyro controls
-    x_pos = map(g_x, -32768, 32767, -512, 512);
-    y_pos = map(g_y, -32768, 32767, -512, 512);
+    // Use Gyro controls when USE_GYRO == 1
+    if (USE_GYRO) {
+        x_pos = map(g_x, -32768, 32767, -512, 512);
+        y_pos = map(g_y, -32768, 32767, -512, 512);
+    }
 
     Serial.print(x_pos);
     Serial.print(" ");
