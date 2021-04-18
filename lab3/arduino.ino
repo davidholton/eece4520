@@ -22,7 +22,7 @@ LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 // Clock
 RTC_Millis rtc;
-
+int prev_minute = 61;
 
 void update_display() {
     DateTime now = rtc.now();
@@ -34,17 +34,16 @@ void update_display() {
     lcd.print(":");
     lcd.print(now.second());
     lcd.print(" ");
+
     // Motor info
     lcd.setCursor(0, 1);
     if (state) {
       lcd.print("C ");
-    } 
-    else {
+    } else {
       lcd.print("CC");
-     }
+    }
     lcd.print(" Speed:");
 
-    //lcd.setCursor(12, 1);
     lcd.print(FAN_STRS[speed_index]);
 }
 
@@ -78,25 +77,42 @@ void setup() {
     // LCD
     lcd.begin(16, 2);
 
+    // Timer Interupt
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1  = 0;
+    OCR1A  = 62500 - 1;
+    TCCR1B = _BV(WGM12) | _BV(CS12);
+    TIMSK1 = _BV(OCIE1A);
+}
+
+ISR(TIMER1_COMPA_vect) {
+    update_display();
 }
 
 void loop() {
 
-    // Speed up/down
-    if (speed_index == 3) {
-        speed_up = false;
-    } else if (speed_index == 0) {
-        speed_up = true;
-    }
+	// Check to see if we are at the start of a new minute
+	DateTime now = rtc.now();
+	int curr_minute = now.minute();
+	if (prev_minute != curr_minute) {
+		prev_minute = curr_minute;
 
-    speed_index += (speed_up ? 1 : -1);
-    set_speed(FAN_SPEEDS[speed_index]);
+		// Change speed up/down
+	    if (speed_index == 3) {
+	        speed_up = false;
+	    } else if (speed_index <= 1) {
+	        speed_up = true;
+	    }
 
+	    speed_index += (speed_up ? 1 : -1);
+	    set_speed(FAN_SPEEDS[speed_index]);
 
-    // Update the LCD
-    update_display();
+	    // Delay 30 seconds
+		delay(30000);
+	}
 
-    delay(1000);
+    set_speed(FAN_SPEEDS[0]);
 }
 
 void button_interupt() {
