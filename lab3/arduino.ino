@@ -48,13 +48,8 @@ void update_display() {
 }
 
 void set_speed(const int speed) {
-
     // Set the new speed
     analogWrite(ENABLE, speed);
-
-    // Update directions
-    digitalWrite(DIRA, state);
-    digitalWrite(DIRB, !state);
 }
 
 void setup() {
@@ -70,20 +65,22 @@ void setup() {
     digitalWrite(DIRB, !state);
     analogWrite(ENABLE, 127);
 
-    // Button
-    pinMode(BUTTON, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(BUTTON), button_interupt, RISING);
-
     // LCD
     lcd.begin(16, 2);
 
     // Timer Interupt
+    noInterrupts();
     TCCR1A = 0;
     TCCR1B = 0;
     TCNT1  = 0;
     OCR1A  = 62500 - 1;
     TCCR1B = _BV(WGM12) | _BV(CS12);
     TIMSK1 = _BV(OCIE1A);
+    interrupts();
+    
+    // Button
+    pinMode(BUTTON, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(BUTTON), button_interupt, RISING);
 }
 
 ISR(TIMER1_COMPA_vect) {
@@ -92,29 +89,33 @@ ISR(TIMER1_COMPA_vect) {
 
 void loop() {
 
-	// Check to see if we are at the start of a new minute
-	DateTime now = rtc.now();
-	int curr_minute = now.minute();
-	if (prev_minute != curr_minute) {
-		prev_minute = curr_minute;
+    // Check to see if we are at the start of a new minute
+    DateTime now = rtc.now();
+    int curr_minute = now.minute();
+    if (prev_minute != curr_minute) {
+        prev_minute = curr_minute;
 
-		// Change speed up/down
-	    if (speed_index == 3) {
-	        speed_up = false;
-	    } else if (speed_index <= 1) {
-	        speed_up = true;
-	    }
+        // Change speed up/down
+        if (speed_index == 3) {
+        speed_up = false;
+        } else if (speed_index <= 1) {
+        speed_up = true;
+        }
 
-	    speed_index += (speed_up ? 1 : -1);
-	    set_speed(FAN_SPEEDS[speed_index]);
+        speed_index += (speed_up ? 1 : -1);
+        set_speed(FAN_SPEEDS[speed_index]);
 
-	    // Delay 30 seconds
-		delay(30000);
-	}
+        // Delay 30 seconds
+        delay(30000);
+    }
 
     set_speed(FAN_SPEEDS[0]);
 }
 
 void button_interupt() {
     state = !state;
+    
+    // Update directions
+    digitalWrite(DIRA, state);
+    digitalWrite(DIRB, !state);
 }
